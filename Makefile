@@ -71,13 +71,13 @@ $(OBJDIR):
 	$(LOG) Creating \'$(SALMON)objects$(CHERRY)\' directory$(NORMAL)
 
 clean:
-	$(SAY)Cleaning objects ? why the hell would you do that ?$(NORMAL)
+	$(SAY)Cleaning objects ? Why the hell would you do that ?$(NORMAL)
 	$(LOG) Cleaning $(SALMON)objects$(CHERRY) \(\'.o\' files just in case\)
 	rm -vf $(OBJ)
 	$(ENDLOG)
 
 clear:
-	$(SAY)Killing all temp files ? in my world we call that racism$(NORMAL)
+	$(SAY)Killing all temp files ? In my world we call that racism$(NORMAL)
 	$(LOG) Clearing those damn $(SALMON)temp files$(CHERRY)
 	rm -vf *~
 	rm -vf include/*~
@@ -106,12 +106,12 @@ $(BOLD), the Makefile cephalon.$(NORMAL)
 mental capacities to read a manual \(most of the programmers don\'t\)$(SALMON)$(BOLD)\"$(NORMAL)
 
 help:
-	$(SAY)Oh, finally someone brave enough too read a $(SALMON)manual$(NORMAL)
+	$(SAY)Oh, finally someone brave enough to read a $(SALMON)manual$(NORMAL)
 	$(MAN) hello $(NORMAL)$(CHERRY)':' Allow me to introduce myself$(NORMAL)
-	$(MAN) make, re, clean, fclean $(NORMAL)$(CHERRY)':' Come on, don\'t tell me you don\'t know theses$(NORMAL)
+	$(MAN) make, re, clean, fclean $(NORMAL)$(CHERRY)':' Come on, don\'t tell me you don\'t know these$(NORMAL)
 	$(MAN) clear $(NORMAL)$(CHERRY)':' Clean the temp files \(*~, mainly\)$(NORMAL)
 	$(MAN) install $(NORMAL)$(CHERRY)':' Create your \'src\', \'objects\' \& \'include\' \
-folders if they doesn\t exists \(+ a filled .gitignore file\)$(NORMAL)
+folders if they don\'t exist \(+ a filled .gitignore file\)$(NORMAL)
 	$(MAN) listsrc $(NORMAL)$(CHERRY)':' List your source files$(NORMAL)
 	$(MAN) joke $(NORMAL)$(CHERRY)':' Let me tell you the best joke ever$(NORMAL)
 	$(MAN) help $(NORMAL)$(CHERRY)':' Are you fucking kidding me ?$(NORMAL)
@@ -122,13 +122,13 @@ credits:
 	$(SAY) As you already know my name is $(SALMON)Sigma$(NORMAL)$(BOLD), it means
 	$(SAY) Super Intelligent Genderless MAkefile
 	$(SAY) I have been created by a shitty edgy weirdo named \'$(SALMON)Suraii$(NORMAL)$(BOLD)\'
-	$(SAY) If you want to tell him how bad he is at developping here\'s his discord ':'
+	$(SAY) If you want to tell him how bad he is at programming here\'s his discord ':'
 	$(SAY) '->' Suraii#6133 \(Care, he is very edgy\)$(NORMAL)
 
 joke:
 	$(SAY)What\'s my name ?$(NORMAL)
 	sleep 2
-	$(SAY)Sigma balls nibba \(if you doesn\'t find this funny, then care, you probably have ligma\)$(NORMAL)
+	$(SAY)Sigma balls nibba \(if you don\'t find this funny, then care, you probably have ligma\)$(NORMAL)
 
 listsrc:
 	$(SAY)Okay let\'s display all these sources
@@ -139,7 +139,7 @@ listsrc:
 	$(ENDLOG)
 
 install:
-	$(SAY)Do your work ? what do you think I am, a maid ? oh yes, It\'s my function, shitty life..
+	$(SAY)Do your work ? what do you think I am, a maid ? Oh yes, it\'s my function, shitty life..
 	$(LOG) Installing basic architecture
 	if ! [ -d "src" ]; then \
 		mkdir src; else \
