@@ -17,7 +17,9 @@ CHERRY		=	"\e[38;5;167m"
 
 #----- VARIABLES -----#
 
-SRC	=	$(wildcard src/*.c)
+SRCDIR	=	src/
+
+SRC	=	$(wildcard $(SRCDIR)/*.c)
 
 INCLUDE	=	-Iinclude/
 
@@ -49,23 +51,18 @@ all: $(NAME)
 	$(SAY)Everything compiled $(SALMON)successfully$(NORMAL)$(BOLD), \
 seems like you finally succeed to code decently.$(NORMAL)
 
-$(NAME): $(OBJ)
+$(NAME): $(OBJDIR) $(OBJ)
 	$(LOG) Compiling $(SALMON)objects$(CHERRY)
 	@gcc $(CFLAGS) -o $(NAME) $(OBJ) && echo -e $(SALMON)$(NAME) $(CHERRY)builded ✔
 	$(ENDLOG)
 
-$(OBJ): $(OBJDIR)
+$(OBJ): $(OBJDIR)%.o: $(SRCDIR)%.c
 	$(SAY)Okay, let\'s see if you fucked up your code$(NORMAL)
 	$(LOG) Compiling $(SALMON)sources $(CHERRY)
-	@for file in $(SRC); do\
-		gcc -c $(CFLAGS) $$file \
-&& echo -e $$file $(SALMON)✔$(CHERRY) \
-|| (echo -e $(CHIP) $(NORMAL)$(BOLD)Aannd you failed, try this out ':' \
-\'$(SALMON)http://cforbeginners.com/$(NORMAL)$(BOLD)\'$(CHERRY));\
-	done
-	@echo
-	@$(LOG) Stowing $(SALMON)objects $(CHERRY)
-	@mv -v *.o $(OBJDIR)
+	@gcc -c $< -o $@ $(CFLAGS) \
+		&& echo -e $< $(SALMON)✔$(CHERRY) \
+		|| (echo -e $(CHIP) $(NORMAL)$(BOLD)Aannd you failed, try this out ':' \
+		\'$(SALMON)http://cforbeginners.com/$(NORMAL)$(BOLD)\'$(CHERRY));\
 	$(ENDLOG)
 
 $(OBJDIR):
