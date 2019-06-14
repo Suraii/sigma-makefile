@@ -19,7 +19,7 @@ CHERRY		=	"\e[38;5;167m"
 
 #--- Compilation
 # [?] PUT YOUR SOURCE DIRS UN SRCDIRS [?]
-SRCDIRS = 	src
+SRCDIRS = 	src src/cave
 SRC	=	$(shell find $(SRCDIRS) -maxdepth 1 -iname *.c)
 INCLUDE	=	-Iinclude/
 OBJDIR	=	objects
@@ -38,6 +38,7 @@ ENDLOG	=	echo -e $(NORMAL)
 
 #--- Misc
 ERRORS	=	0
+FAILS   =	0
 
 #----- RULES -----#
 
@@ -45,7 +46,7 @@ ERRORS	=	0
 .PHONY: re clean fclean introduce_compilation
 
 all: $(NAME)
-	if [ $(ERRORS) == 0 ]; then \
+	if [ $(ERRORS) == 0 ] && [ $(FAILS) == 0 ]; then \
 		$(SAY)Everything compiled $(SALMON)successfully$(NORMAL)$(BOLD), \
 seems like you finally succeed to code decently.$(NORMAL); else \
 		$(SAY)Aannd you failed, try this out ':' \
@@ -58,13 +59,16 @@ introduce_compilation:
 
 $(NAME): introduce_compilation $(OBJDIR) $(OBJSUBDIRS) $(OBJ)
 	$(LOG) Compiling $(SALMON)objects$(CHERRY)
-	gcc $(CFLAGS) -o $(NAME) $(OBJ) && echo -e $(SALMON)$(NAME) $(CHERRY)builded ✔  
+	gcc $(CFLAGS) -o $(NAME) $(OBJ) && echo -e $(SALMON)$(NAME) $(CHERRY)builded ✔  \
+	|| echo -e Couldn\'t build $(SALMON)$(NAME)$(CHERRY)✘  && \
+$(eval FAILS=$(shell echo $$(($(ERRORS)+1)))) \
 	$(ENDLOG)
 
 $(OBJDIR)/%.o: %.c
 	gcc -c $< -o $@ $(CFLAGS) \
 		&& echo -e $< $(SALMON)✔ $(CHERRY) \
-		|| echo -e $(BOLD)$(SALMON)+1$(NORMAL)$(CHERRY) file fucked$(NORMAL) && $(eval ERRORS=$(shell echo $$(($(ERRORS)+1)))) \
+		|| echo -e $(BOLD)$(SALMON)+1$(NORMAL)$(CHERRY) file fucked$(NORMAL)
+			&& $(eval ERRORS=$(shell echo $$(($(ERRORS)+1)))) \
 	$(ENDLOG)
 
 $(OBJDIR):
