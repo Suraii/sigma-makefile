@@ -17,34 +17,26 @@ CHERRY		=	"\e[38;5;167m"
 
 #----- VARIABLES -----#
 
+#--- Compilation
+# [?] PUT YOUR SOURCE DIRS UN SRCDIRS [?]
 SRCDIRS = 	src
-
 SRC	=	$(shell find $(SRCDIRS) -maxdepth 1 -iname *.c)
-
 INCLUDE	=	-Iinclude/
-
 OBJDIR	=	objects
-
 OBJSUBDIRS	=	$(addprefix $(OBJDIR)/, $(SRCDIRS))
-
 OBJ	=	$(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(SRC))))
-
 NAME	=	test
-
 CFLAGS	=	-Wall -Wextra $(INCLUDE)
 
+#--- Speach
 CHIP	=	$(BOLD)$(CHERRY)[$(SALMON)Σ$(CHERRY)]$(NORMAL)
-
 DISP	=	echo -e $(TITLE)$(LIGHTGRAY)
-
 SAY	=	echo -e $(CHIP) $(BOLD)
-
 LOG	=	echo -e $(CHERRY) \>
-
 MAN	=	echo -e $(BOLD)$(SALMON)-
-
 ENDLOG	=	echo -e $(NORMAL)
 
+#--- Misc
 ERRORS	=	0
 
 #----- RULES -----#
