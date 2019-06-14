@@ -17,15 +17,17 @@ CHERRY		=	"\e[38;5;167m"
 
 #----- VARIABLES -----#
 
-SRCDIR	=	src/
+SRCDIRS = 	src src/cave
 
-SRC	=	$(wildcard $(SRCDIR)/*.c)
+SRC	=	$(shell find $(SRCDIRS) -maxdepth 1 -iname *.c)
 
 INCLUDE	=	-Iinclude/
 
-OBJDIR	=	objects/
+OBJDIR	=	objects
 
-OBJ	=	$(addprefix $(OBJDIR), $(notdir $(SRC:.c=.o)))
+OBJSUBDIRS	=	$(addprefix $(OBJDIR)/, $(SRCDIRS))
+
+OBJ	=	$(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(SRC))))
 
 NAME	=	test
 
@@ -43,32 +45,44 @@ MAN	=	echo -e $(BOLD)$(SALMON)-
 
 ENDLOG	=	echo -e $(NORMAL)
 
+ERRORS	=	0
+
 #----- RULES -----#
 
-.SILENT: all $(NAME) $(OBJ) $(OBJDIR) clean clear fclean re
-.PHONY: re clean fclean
+.SILENT: all $(NAME) $(OBJ) $(OBJDIR) $(OBJSUBDIRS) clean clear fclean re introduce_compilation
+.PHONY: re clean fclean introduce_compilation
 
 all: $(NAME)
-	$(SAY)Everything compiled $(SALMON)successfully$(NORMAL)$(BOLD), \
-seems like you finally succeed to code decently.$(NORMAL)
+	if [ $(ERRORS) == 0 ]; then \
+		$(SAY)Everything compiled $(SALMON)successfully$(NORMAL)$(BOLD), \
+seems like you finally succeed to code decently.$(NORMAL); else \
+		$(SAY)Aannd you failed, try this out ':' \
+\'$(SALMON)http://cforbeginners.com/$(NORMAL)$(BOLD)\' \($(ERRORS) file\(s\) fucked\)$(NORMAL); \
+	fi
 
-$(NAME): $(OBJDIR) $(OBJ)
-	$(LOG) Compiling $(SALMON)objects$(CHERRY)
-	gcc $(CFLAGS) -o $(NAME) $(OBJ) && echo -e $(SALMON)$(NAME) $(CHERRY)builded ✔
-	$(ENDLOG)
-
-$(OBJ): $(OBJDIR)%.o: $(SRCDIR)%.c
+introduce_compilation:
 	$(SAY)Okay, let\'s see if you fucked up your code$(NORMAL)
 	$(LOG) Compiling $(SALMON)sources $(CHERRY)
+
+$(NAME): introduce_compilation $(OBJDIR) $(OBJSUBDIRS) $(OBJ)
+	$(LOG) Compiling $(SALMON)objects$(CHERRY)
+	gcc $(CFLAGS) -o $(NAME) $(OBJ) && echo -e $(SALMON)$(NAME) $(CHERRY)builded ✔  
+	$(ENDLOG)
+
+$(OBJDIR)/%.o: %.c
 	gcc -c $< -o $@ $(CFLAGS) \
-		&& echo -e $< $(SALMON)✔$(CHERRY) \
-		|| (echo -e $(CHIP) $(NORMAL)$(BOLD)Aannd you failed, try this out ':' \
-		\'$(SALMON)http://cforbeginners.com/$(NORMAL)$(BOLD)\'$(CHERRY));\
+		&& echo -e $< $(SALMON)✔ $(CHERRY) \
+		|| echo -e $(BOLD)$(SALMON)+1$(NORMAL)$(CHERRY) file fucked$(NORMAL) && $(eval ERRORS=$(shell echo $$(($(ERRORS)+1)))) \
 	$(ENDLOG)
 
 $(OBJDIR):
 	mkdir objects
 	$(LOG) Creating \'$(SALMON)objects$(CHERRY)\' directory$(NORMAL)
+
+$(OBJSUBDIRS):
+	$(LOG) Mirroring source $(SALMON)architecture$(CHERRY) in $(OBJDIR)
+	mkdir -pv $(OBJSUBDIRS)
+	$(ENDLOG)
 
 clean:
 	$(SAY)Cleaning objects ? Why the hell would you do that ?$(NORMAL)
@@ -79,9 +93,9 @@ clean:
 clear:
 	$(SAY)Killing all temp files ? In my world we call that racism$(NORMAL)
 	$(LOG) Clearing those damn $(SALMON)temp files$(CHERRY)
-	rm -vf *~
-	rm -vf include/*~
-	rm -vf src/*~
+	find -iname *~ -printf "Deleted %f (%s bytes)\n" -delete
+	find -iname \#*\# -printf "Deleted %f (%s bytes)\n" -delete
+	find -iname vgcore.* -printf "Deleted %f (%s bytes)\n" -delete
 	$(ENDLOG)
 
 fclean: clean
@@ -95,8 +109,8 @@ re: fclean all
 
 #----- INTERACTIONS -----#
 
-.PHONY: hello listsrc joke help credits
-.SILENT: hello help credits joke listsrc install
+.PHONY: hello listsrc joke help credits listobj
+.SILENT: hello help credits joke listsrc listobj install
 
 hello:
 	$(SAY)$(SALMON)\"$(NORMAL)$(BOLD)Greetings master, I\'m $(SALMON)Sigma$(NORMAL)\
@@ -134,6 +148,14 @@ listsrc:
 	$(SAY)Okay let\'s display all these sources
 	$(LOG) $(SALMON)source$(CHERRY) files ':'
 	for file in $(SRC); do\
+		echo $$file;\
+	done
+	$(ENDLOG)
+
+listobj:
+	$(SAY)Can we call this \'object-oriented\' programming ?
+	$(LOG) $(SALMON)obj$(CHERRY) files ':'
+	for file in $(OBJ); do\
 		echo $$file;\
 	done
 	$(ENDLOG)
