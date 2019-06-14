@@ -17,7 +17,7 @@ CHERRY		=	"\e[38;5;167m"
 
 #----- VARIABLES -----#
 
-SRCDIRS = 	src src/cave
+SRCDIRS = 	src
 
 SRC	=	$(shell find $(SRCDIRS) -maxdepth 1 -iname *.c)
 
