@@ -15,6 +15,10 @@ SALMON		=	"\e[38;5;217m"
 
 CHERRY		=	"\e[38;5;167m"
 
+#----- FLAGS -----#
+
+MAKEFLAGS += --no-print-directory --silence --silent
+
 #----- VARIABLES -----#
 
 #--- Compilation
@@ -36,9 +40,8 @@ LOG	=	echo -e $(CHERRY) \>
 MAN	=	echo -e $(BOLD)$(SALMON)-
 ENDLOG	=	echo -e $(NORMAL)
 
-#--- Misc
-ERRORS	=	0
-FAILS   =	0
+#--- System
+SYSFILES =	.sigma .sigma/fails .sigma/errors
 
 #----- RULES -----#
 
@@ -46,27 +49,30 @@ FAILS   =	0
 .PHONY: re clean fclean introduce_compilation
 
 all: $(NAME)
-	if [ $(ERRORS) == 0 ] && [ $(FAILS) == 0 ]; then \
+	if [ $(shell cat .sigma/errors) == 0 ] && [ $(shell cat .sigma/fails) == 0 ]; then \
 		$(SAY)Everything compiled $(SALMON)successfully$(NORMAL)$(BOLD), \
 seems like you finally succeed to code decently.$(NORMAL); else \
 		$(SAY)Aannd you failed, try this out ':' \
-\'$(SALMON)http://cforbeginners.com/$(NORMAL)$(BOLD)\' \($(ERRORS) file\(s\) fucked\)$(NORMAL); \
-	fi
+\'$(SALMON)http://cforbeginners.com/$(NORMAL)$(BOLD)\' \($(shell cat .sigma/errors) file\(s\) fucked\)$(NORMAL); \
+	fi && echo $(FAILS)
+	$(MAKE) reset_fails
+	$(MAKE) reset_errors
 
-introduce_compilation:
+introduce_compilation: $(SYSFILES)
 	$(SAY)Okay, let\'s see if you fucked up your code$(NORMAL)
 	$(LOG) Compiling $(SALMON)sources $(CHERRY)
 
 $(NAME): introduce_compilation $(OBJDIR) $(OBJSUBDIRS) $(OBJ)
 	$(LOG) Compiling $(SALMON)objects$(CHERRY)
-	gcc $(CFLAGS) -o $(NAME) $(OBJ) && echo -e $(SALMON)$(NAME) $(CHERRY)builded ✔  \
-	|| echo -e Couldn\'t build $(SALMON)$(NAME)$(CHERRY)✘  && $(eval FAILS=$(shell echo $$(($(ERRORS)+1)))) \
+	gcc $(CFLAGS) -o $(NAME) $(OBJ) \
+		&& echo -e $(SALMON)$(NAME) $(CHERRY)builded ✔  \
+		|| (echo -e Couldn\'t  build $(SALMON)$(NAME)$(CHERRY)✘ ; $(MAKE) increment_fails)
 	$(ENDLOG)
 
 $(OBJDIR)/%.o: %.c
 	gcc -c $< -o $@ $(CFLAGS) \
 		&& echo -e $< $(SALMON)✔ $(CHERRY) \
-		|| echo -e $(BOLD)$(SALMON)+1$(NORMAL)$(CHERRY) file fucked$(NORMAL) && $(eval ERRORS=$(shell echo $$(($(ERRORS)+1)))) \
+		|| (echo -e $(BOLD)$(SALMON)+1$(NORMAL)$(CHERRY) file fucked$(NORMAL) ; $(MAKE) increment_errors)
 	$(ENDLOG)
 
 $(OBJDIR):
@@ -100,6 +106,28 @@ fclean: clean
 	$(ENDLOG)
 
 re: fclean all
+
+#----- SYSTEM -----#
+
+.PHONY: increment_fails reset_fails increment_errors reset_errors
+.SILENT: $(SYSFILES) increment_fails reset_fails increment_errors reset_errors
+
+$(SYSFILES):
+	mkdir -pv .sigma
+	echo 0 > .sigma/fails
+	echo 0 > .sigma/errors
+
+increment_fails: $(SYSFILES)
+	$(shell echo $$((`cat ".sigma/fails"` + 1)) > .sigma/fails)
+
+reset_fails: $(SYSFILES)
+	echo 0 > .sigma/fails
+
+increment_errors: $(SYSFILES)
+	$(shell echo $$((`cat ".sigma/errors"` + 1)) > .sigma/errors)
+
+reset_errors: $(SYSFILES)
+	echo 0 > .sigma/errors
 
 #----- INTERACTIONS -----#
 
@@ -167,7 +195,7 @@ install:
 	fi
 	$(LOG) Installing .gitignore
 	if ! [ -d ".gitignore" ]; then \
-		(touch .gitignore && echo -e $(NAME)"\n"\
+		(touch .gitignore && echo -e $(NAME)"\n" ".sigma\n"\
 $(addprefix $(OBJDIR), "*") "\n*~" "\nsrc/*~" "\ninclude/*~" | cat > .gitignore); else \
 		echo -e \'$(SALMON).gitignore$(CHERRY)\': file already exists; \
 	fi
