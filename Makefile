@@ -60,15 +60,13 @@ introduce_compilation:
 $(NAME): introduce_compilation $(OBJDIR) $(OBJSUBDIRS) $(OBJ)
 	$(LOG) Compiling $(SALMON)objects$(CHERRY)
 	gcc $(CFLAGS) -o $(NAME) $(OBJ) && echo -e $(SALMON)$(NAME) $(CHERRY)builded ✔  \
-	|| echo -e Couldn\'t build $(SALMON)$(NAME)$(CHERRY)✘  && \
-$(eval FAILS=$(shell echo $$(($(ERRORS)+1)))) \
+	|| echo -e Couldn\'t build $(SALMON)$(NAME)$(CHERRY)✘  && $(eval FAILS=$(shell echo $$(($(ERRORS)+1)))) \
 	$(ENDLOG)
 
 $(OBJDIR)/%.o: %.c
 	gcc -c $< -o $@ $(CFLAGS) \
 		&& echo -e $< $(SALMON)✔ $(CHERRY) \
-		|| echo -e $(BOLD)$(SALMON)+1$(NORMAL)$(CHERRY) file fucked$(NORMAL)
-			&& $(eval ERRORS=$(shell echo $$(($(ERRORS)+1)))) \
+		|| echo -e $(BOLD)$(SALMON)+1$(NORMAL)$(CHERRY) file fucked$(NORMAL) && $(eval ERRORS=$(shell echo $$(($(ERRORS)+1)))) \
 	$(ENDLOG)
 
 $(OBJDIR):
