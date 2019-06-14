@@ -31,6 +31,7 @@ OBJSUBDIRS	=	$(addprefix $(OBJDIR)/, $(SRCDIRS))
 OBJ	=	$(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(SRC))))
 NAME	=	test
 CFLAGS	=	-Wall -Wextra $(INCLUDE)
+DEBUGFLAGS =	-g3
 
 #--- Speach
 CHIP	=	$(BOLD)$(CHERRY)[$(SALMON)Σ$(CHERRY)]$(NORMAL)
@@ -45,7 +46,7 @@ SYSFILES =	.sigma .sigma/fails .sigma/errors
 
 #----- RULES -----#
 
-.SILENT: all $(NAME) $(OBJ) $(OBJDIR) $(OBJSUBDIRS) clean clear fclean re introduce_compilation
+.SILENT: all $(NAME) $(OBJ) $(OBJDIR) $(OBJSUBDIRS) clean clear fclean re introduce_compilation debug
 .PHONY: re clean fclean introduce_compilation
 
 all: $(NAME)
@@ -58,6 +59,16 @@ seems like you finally succeed to code decently.$(NORMAL); else \
 	$(MAKE) reset_fails
 	$(MAKE) reset_errors
 
+debug:
+	$(SAY) You really want to see your $(SALMON)valgrind$(NORMAL)$(BOLD) logs ? \
+I bet it\'s full of invalid reads \& memory leaks..$(NORMAL)
+	$(LOG) Compiling $(SALMON)source $(CHERRY)with $(SALMON)debug $(CHERRY)options
+	gcc $(CFLAGS) $(DEBUGFLAGS) $(SRC) -o $(NAME) \
+		&& echo -e $(SALMON)$(NAME) $(CHERRY)builded ✔  \
+		|| echo -e Couldn\'t build $(SALMON)$(NAME)$(CHERRY)✘
+	$(SAY) If you failed compiling this you should try to $(SALMON)git gud
+	$(ENDLOG)
+
 introduce_compilation: $(SYSFILES)
 	$(SAY)Okay, let\'s see if you fucked up your code$(NORMAL)
 	$(LOG) Compiling $(SALMON)sources $(CHERRY)
@@ -66,7 +77,7 @@ $(NAME): introduce_compilation $(OBJDIR) $(OBJSUBDIRS) $(OBJ)
 	$(LOG) Compiling $(SALMON)objects$(CHERRY)
 	gcc $(CFLAGS) -o $(NAME) $(OBJ) \
 		&& echo -e $(SALMON)$(NAME) $(CHERRY)builded ✔  \
-		|| (echo -e Couldn\'t  build $(SALMON)$(NAME)$(CHERRY)✘ ; $(MAKE) increment_fails)
+		|| (echo -e Couldn\'t build $(SALMON)$(NAME)$(CHERRY)✘ ; $(MAKE) increment_fails)
 	$(ENDLOG)
 
 $(OBJDIR)/%.o: %.c
@@ -145,10 +156,13 @@ help:
 	$(SAY)Oh, finally someone brave enough to read a $(SALMON)manual$(NORMAL)
 	$(MAN) hello $(NORMAL)$(CHERRY)':' Allow me to introduce myself$(NORMAL)
 	$(MAN) make, re, clean, fclean $(NORMAL)$(CHERRY)':' Come on, don\'t tell me you don\'t know these$(NORMAL)
+	$(MAN) debug $(NORMAL)$(CHERRY)':' Compile with debug flags \(-g3 by default, customisable\)
 	$(MAN) clear $(NORMAL)$(CHERRY)':' Clean the temp files \(*~, mainly\)$(NORMAL)
 	$(MAN) install $(NORMAL)$(CHERRY)':' Create your \'src\', \'objects\' \& \'include\' \
 folders if they don\'t exist \(+ a filled .gitignore file\)$(NORMAL)
 	$(MAN) listsrc $(NORMAL)$(CHERRY)':' List your source files$(NORMAL)
+	$(MAN) listobj $(NORMAL)$(CHERRY)':' List your obj files, you\'re probably too dumb to understand \
+why it is usefull$(NORMAL)
 	$(MAN) joke $(NORMAL)$(CHERRY)':' Let me tell you the best joke ever$(NORMAL)
 	$(MAN) help $(NORMAL)$(CHERRY)':' Are you fucking kidding me ?$(NORMAL)
 	$(MAN) credits $(NORMAL)$(CHERRY)':' Let you have more details about me \& my creator$(NORMAL)
