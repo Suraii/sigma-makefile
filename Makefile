@@ -72,6 +72,7 @@ introduce_compilation: $(SYSFILES)
 	$(LOG) Compiling $(SALMON)sources $(CHERRY)
 
 $(NAME): introduce_compilation $(OBJDIR) $(OBJSUBDIRS) $(OBJ)
+	$(ENDLOG)
 	$(LOG) Compiling $(SALMON)objects$(CHERRY)
 	gcc $(CFLAGS) -o $(NAME) $(OBJ) \
 		&& echo -e $(SALMON)$(NAME) $(CHERRY)builded ✔  \
@@ -80,9 +81,8 @@ $(NAME): introduce_compilation $(OBJDIR) $(OBJSUBDIRS) $(OBJ)
 
 $(OBJDIR)/%.o: %.c
 	gcc -c $< -o $@ $(CFLAGS) \
-		&& echo -e $< $(SALMON)✔ $(CHERRY) \
-		|| (echo -e $(BOLD)$(SALMON)+1$(NORMAL)$(CHERRY) file fucked$(NORMAL) ; $(MAKE) increment_errors)
-	$(ENDLOG)
+		&& echo -e $(CHERRY)$< $(SALMON)✔ $(CHERRY) \
+		|| (echo -e $(BOLD)$(SALMON)+1$(NORMAL)$(CHERRY) file fucked$(NORMAL); $(MAKE) increment_errors)
 
 $(OBJDIR):
 	mkdir objects
