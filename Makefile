@@ -20,7 +20,7 @@ MAKEFLAGS += --no-print-directory --silence --silent
 #----- VARIABLES -----#
 
 #--- Compilation
-# [?] TO EDIT SRC DIRECTORIES OR BINARY NAME USE THE 'make set' & 'make add', ('make help' to get manuals)[?]
+# [?] TO EDIT SRC DIRECTORIES OR BINARY NAME USE THE 'make set' & 'make add', ('make help' to get manuals) [?]
 SRCDIRS = 	$(shell if ! [ -f .sigma/src ]; then (echo "src" > .sigma/src) fi ; cat .sigma/src)
 SRC	=	$(shell find $(SRCDIRS) -maxdepth 1 -iname *.c)
 INCLUDE	=	-Iinclude/
