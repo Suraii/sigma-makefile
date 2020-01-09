@@ -265,8 +265,8 @@ install: $(SYSFILES)
 	fi
 	$(LOG) Installing .gitignore
 	if ! [ -d ".gitignore" ]; then \
-		(touch .gitignore && echo -e $(NAME)"\n" \
-$(addprefix $(OBJDIR), "*") "\n*~" "\nsrc/*~" "\ninclude/*~" | cat > .gitignore); else \
+		(touch .gitignore && echo -e $(NAME)"\n"\
+$(addprefix $(OBJDIR), "/*")"\n*~" "\nsrc/*~" "\ninclude/*~" | cat > .gitignore); else \
 		echo -e \'$(SALMON).gitignore$(CHERRY)\': file already exists; \
 	fi
 	$(ENDLOG)
