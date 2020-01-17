@@ -22,7 +22,7 @@ MAKEFLAGS += --no-print-directory --silence --silent
 #--- Compilation
 # [?] TO EDIT SRC DIRECTORIES OR BINARY NAME USE THE 'make set' & 'make add', ('make help' to get manuals) [?]
 SRCDIRS = 	$(shell if ! [ -f .sigma/src ]; then (echo "src" > .sigma/src) fi ; cat .sigma/src)
-SRC	=	$(shell find $(SRCDIRS) -maxdepth 1 -iname *.c)
+SRC	=	$(shell ls $(addsuffix /*.c, $(SRCDIRS)))
 INCLUDE	=	-Iinclude/
 OBJDIR	=	objects
 OBJSUBDIRS	=	$(addprefix $(OBJDIR)/, $(SRCDIRS))
@@ -102,8 +102,8 @@ clean:
 clear:
 	$(SAY)Killing all temp files ? In my world we call that racism$(NORMAL)
 	$(LOG) Clearing those damn $(SALMON)temp files$(CHERRY)
-	for file in $(shell ls *~ \#* vgcore.*); do \
-		find -iname $$file -printf "Deleted %f (%s bytes)\n" -delete; \
+	for file in `ls *~ \#*\# vgcore.*`; do
+		find -iname $file -printf "Deleted %f (%s bytes)\n" -delete;
 	done
 	$(ENDLOG)
 
