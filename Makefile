@@ -102,9 +102,9 @@ clean:
 clear:
 	$(SAY)Killing all temp files ? In my world we call that racism$(NORMAL)
 	$(LOG) Clearing those damn $(SALMON)temp files$(CHERRY)
-	find -iname *~ -printf "Deleted %f (%s bytes)\n" -delete
-	find -iname \#*\# -printf "Deleted %f (%s bytes)\n" -delete
-	find -iname vgcore.* -printf "Deleted %f (%s bytes)\n" -delete
+	for file in $(shell ls *~ \#* vgcore.*); do \
+		find -iname $$file -printf "Deleted %f (%s bytes)\n" -delete; \
+	done
 	$(ENDLOG)
 
 fclean: clean
