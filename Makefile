@@ -23,12 +23,14 @@ MAKEFLAGS += --no-print-directory --silence --silent
 
 # Language specific settings. Defaults to C
 LANG	:=	$(or $(shell cat .sigma/lang 2>/dev/null),c)
+CPP_NAMES := cpp c++ cc
+
 ifeq ($(LANG),c) # C Language
 COMPILER	= $(CC)
 FLAGS		= $(CFLAGS)
 EXTENSION	= .c
 
-else ifeq ($(LANG),cpp) # C++ language
+else ifneq ($(filter $(LANG),$(CPP_NAMES)),) # C++ language
 COMPILER	= $(CXX)
 FLAGS		= $(CXXFLAGS)
 EXTENSION	= .cpp
