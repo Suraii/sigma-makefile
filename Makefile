@@ -21,30 +21,30 @@ MAKEFLAGS += --no-print-directory --silence --silent
 
 #--- Compilation
 # [?] TO EDIT SRC DIRECTORIES OR BINARY NAME USE THE 'make set' & 'make add', ('make help' to get manuals) [?]
-SRCDIRS = 	$(shell if ! [ -f .sigma/src ]; then (echo "src" > .sigma/src) fi ; cat .sigma/src)
+SRCDIRS := 	$(shell if ! [ -f .sigma/src ]; then (echo "src" > .sigma/src) fi ; cat .sigma/src)
 # Set VPATH to SRCDIRS to allow sources to be discovered automagically
 VPATH 	:= $(SRCDIRS)
-SRC	:=	$(notdir $(shell ls $(addsuffix /*.c, $(SRCDIRS))))
-INCLUDE	=	-Iinclude/
-OBJDIR	=	objects
-OBJ	=	$(addprefix $(OBJDIR)/,$(SRC:.c=.o))
-NAME	=	$(shell if ! [ -f .sigma/name ]; then (echo "binary" > .sigma/name) fi ; cat .sigma/name)
-CFLAGS	=	-Wall -Wextra $(INCLUDE)
-DEBUGFLAGS =	-g3
+SRC		:=	$(notdir $(shell ls $(addsuffix /*.c, $(SRCDIRS))))
+INCLUDE	:=	-Iinclude/
+OBJDIR	:=	objects
+OBJ		:=	$(addprefix $(OBJDIR)/,$(SRC:.c=.o))
+NAME	:=	$(shell if ! [ -f .sigma/name ]; then (echo "binary" > .sigma/name) fi ; cat .sigma/name)
+CFLAGS	:=	-Wall -Wextra $(INCLUDE)
+DEBUGFLAGS :=	-g3
 
-DEPDIR	=	dependencies
-DEPENDENCIES	=	$(addprefix $(DEPDIR)/,$(SRC:.c=.d))
+DEPDIR	:=	dependencies
+DEPENDENCIES	:=	$(addprefix $(DEPDIR)/,$(SRC:.c=.d))
 
 #--- Speach
-CHIP	=	$(BOLD)$(CHERRY)[$(SALMON)Σ$(CHERRY)]$(NORMAL)
-DISP	=	echo -e $(TITLE)$(LIGHTGRAY)
-SAY	=	echo -e $(CHIP) $(BOLD)
-LOG	=	echo -e $(CHERRY) \>
-MAN	=	echo -e $(BOLD)$(SALMON)-
-ENDLOG	=	echo -e $(NORMAL)
+CHIP	:=	$(BOLD)$(CHERRY)[$(SALMON)Σ$(CHERRY)]$(NORMAL)
+DISP	:=	echo -e $(TITLE)$(LIGHTGRAY)
+SAY	:=	echo -e $(CHIP) $(BOLD)
+LOG	:=	echo -e $(CHERRY) \>
+MAN	:=	echo -e $(BOLD)$(SALMON)-
+ENDLOG	:=	echo -e $(NORMAL)
 
 #--- System
-SYSFILES =	.sigma .sigma/fails .sigma/errors
+SYSFILES :=	.sigma .sigma/fails .sigma/errors
 
 #----- RULES -----#
 
