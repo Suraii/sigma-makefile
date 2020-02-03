@@ -22,14 +22,18 @@ MAKEFLAGS += --no-print-directory --silence --silent
 #--- Compilation
 # [?] TO EDIT SRC DIRECTORIES OR BINARY NAME USE THE 'make set' & 'make add', ('make help' to get manuals) [?]
 SRCDIRS = 	$(shell if ! [ -f .sigma/src ]; then (echo "src" > .sigma/src) fi ; cat .sigma/src)
-SRC	=	$(shell ls $(addsuffix /*.c, $(SRCDIRS)))
+# Set VPATH to SRCDIRS to allow sources to be discovered automagically
+VPATH 	:= $(SRCDIRS)
+SRC	:=	$(notdir $(shell ls $(addsuffix /*.c, $(SRCDIRS))))
 INCLUDE	=	-Iinclude/
 OBJDIR	=	objects
-OBJSUBDIRS	=	$(addprefix $(OBJDIR)/, $(SRCDIRS))
-OBJ	=	$(addprefix $(OBJDIR)/, $(addsuffix .o, $(basename $(SRC))))
+OBJ	=	$(addprefix $(OBJDIR)/,$(SRC:.c=.o))
 NAME	=	$(shell if ! [ -f .sigma/name ]; then (echo "binary" > .sigma/name) fi ; cat .sigma/name)
 CFLAGS	=	-Wall -Wextra $(INCLUDE)
 DEBUGFLAGS =	-g3
+
+DEPDIR	=	dependencies
+DEPENDENCIES	=	$(addprefix $(DEPDIR)/,$(SRC:.c=.d))
 
 #--- Speach
 CHIP	=	$(BOLD)$(CHERRY)[$(SALMON)Σ$(CHERRY)]$(NORMAL)
@@ -57,6 +61,9 @@ seems like you finally succeed to code decently.$(NORMAL); else \
 	$(MAKE) reset_fails
 	$(MAKE) reset_errors
 
+# Insert all dependencies
+-include $(DEPENDENCIES)
+
 debug:
 	$(SAY) You really want to see your $(SALMON)valgrind$(NORMAL)$(BOLD) logs ? \
 I bet it\'s full of invalid reads \& memory leaks..$(NORMAL)
@@ -71,7 +78,7 @@ introduce_compilation: $(SYSFILES)
 	$(SAY)Okay, let\'s see if you fucked up your code$(NORMAL)
 	$(LOG) Compiling $(SALMON)sources $(CHERRY)
 
-$(NAME): introduce_compilation $(OBJDIR) $(OBJSUBDIRS) $(OBJ)
+$(NAME): introduce_compilation $(OBJ)
 	$(ENDLOG)
 	$(LOG) Compiling $(SALMON)objects$(CHERRY)
 	gcc $(CFLAGS) -o $(NAME) $(OBJ) \
@@ -79,24 +86,23 @@ $(NAME): introduce_compilation $(OBJDIR) $(OBJSUBDIRS) $(OBJ)
 		|| (echo -e Couldn\'t build $(SALMON)$(NAME)$(CHERRY)✘ ; $(MAKE) increment_fails)
 	$(ENDLOG)
 
-$(OBJDIR)/%.o: %.c
+$(OBJ): | $(OBJDIR) $(DEPDIR)
+
+$(OBJ):$(OBJDIR)/%.o: %.c
 	gcc -c $< -o $@ $(CFLAGS) \
 		&& echo -e $(CHERRY)$< $(SALMON)✔ $(CHERRY) \
 		|| (echo -e $(BOLD)$(SALMON)+1$(NORMAL)$(CHERRY) file fucked$(NORMAL); $(MAKE) increment_errors)
+	gcc -MM $< > $(DEPDIR)/$*.d $(CFLAGS)
+	sed -i -e 's|.*:|$@:|' $(DEPDIR)/$*.d
 
-$(OBJDIR):
-	mkdir objects
-	$(LOG) Creating \'$(SALMON)objects$(CHERRY)\' directory$(NORMAL)
-
-$(OBJSUBDIRS):
-	$(LOG) Mirroring source $(SALMON)architecture$(CHERRY) in $(OBJDIR)
-	mkdir -pv $(OBJSUBDIRS)
-	$(ENDLOG)
+$(OBJDIR) $(DEPDIR):
+	mkdir -p $@
+	$(LOG) Creating \'$(SALMON)$@$(CHERRY)\' directory$(NORMAL)
 
 clean:
 	$(SAY)Cleaning objects ? Why the hell would you do that ?$(NORMAL)
 	$(LOG) Cleaning $(SALMON)objects$(CHERRY) \(\'.o\' files just in case\)
-	rm -vf $(OBJ)
+	rm -vf $(OBJ) $(DEPENDENCIES)
 	$(ENDLOG)
 
 clear:
