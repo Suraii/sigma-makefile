@@ -20,20 +20,40 @@ MAKEFLAGS += --no-print-directory --silence --silent
 #----- VARIABLES -----#
 
 #--- Compilation
+
+# Language specific settings. Defaults to C
+LANG	:=	$(or $(shell cat .sigma/lang 2>/dev/null),c)
+CPP_NAMES := cpp c++ cc
+
+ifeq ($(LANG),c) # C Language
+COMPILER	= $(CC)
+FLAGS		= $(CFLAGS)
+EXTENSION	= .c
+
+else ifneq ($(filter $(LANG),$(CPP_NAMES)),) # C++ language
+COMPILER	= $(CXX)
+FLAGS		= $(CXXFLAGS)
+EXTENSION	= .cpp
+
+else # Unsupported language
+$(error Language not supported: $(LANG))
+endif
+
 # [?] TO EDIT SRC DIRECTORIES OR BINARY NAME USE THE 'make set' & 'make add', ('make help' to get manuals) [?]
 SRCDIRS := 	$(shell if ! [ -f .sigma/src ]; then (echo "src" > .sigma/src) fi ; cat .sigma/src)
 # Set VPATH to SRCDIRS to allow sources to be discovered automagically
 VPATH 	:= $(SRCDIRS)
-SRC		:=	$(notdir $(shell ls $(addsuffix /*.c, $(SRCDIRS))))
+SRC		:=	$(notdir $(shell ls $(addsuffix /*$(EXTENSION), $(SRCDIRS))))
 INCLUDE	:=	-Iinclude/
 OBJDIR	:=	objects
-OBJ		:=	$(addprefix $(OBJDIR)/,$(SRC:.c=.o))
+OBJ		:=	$(addprefix $(OBJDIR)/,$(SRC:$(EXTENSION)=.o))
 NAME	:=	$(shell if ! [ -f .sigma/name ]; then (echo "binary" > .sigma/name) fi ; cat .sigma/name)
-CFLAGS	:=	-Wall -Wextra $(INCLUDE)
+CFLAGS	+=	-Wall -Wextra $(INCLUDE)
+CXXFLAGS += $(CFLAGS)
 DEBUGFLAGS :=	-g3
 
 DEPDIR	:=	dependencies
-DEPENDENCIES	:=	$(addprefix $(DEPDIR)/,$(SRC:.c=.d))
+DEPENDENCIES	:=	$(addprefix $(DEPDIR)/,$(SRC:$(EXTENSION)=.d))
 
 #--- Speach
 CHIP	:=	$(BOLD)$(CHERRY)[$(SALMON)Σ$(CHERRY)]$(NORMAL)
@@ -68,7 +88,7 @@ debug:
 	$(SAY) You really want to see your $(SALMON)valgrind$(NORMAL)$(BOLD) logs ? \
 I bet it\'s full of invalid reads \& memory leaks..$(NORMAL)
 	$(LOG) Compiling $(SALMON)source $(CHERRY)with $(SALMON)debug $(CHERRY)options
-	gcc $(CFLAGS) $(DEBUGFLAGS) $(SRC) -o $(NAME) \
+	$(COMPILER) $(FLAGS) $(DEBUGFLAGS) $(SRC) -o $(NAME) \
 		&& echo -e $(SALMON)$(NAME) $(CHERRY)builded ✔ \
 		|| echo -e $(CHERRY)Couldn\'t build $(SALMON)$(NAME)$(CHERRY)✘
 	$(SAY) If you failed compiling this you should try to $(SALMON)git gud
@@ -81,18 +101,18 @@ introduce_compilation: $(SYSFILES)
 $(NAME): introduce_compilation $(OBJ)
 	$(ENDLOG)
 	$(LOG) Compiling $(SALMON)objects$(CHERRY)
-	gcc $(CFLAGS) -o $(NAME) $(OBJ) \
+	$(COMPILER) $(FLAGS) -o $(NAME) $(OBJ) \
 		&& echo -e $(SALMON)$(NAME) $(CHERRY)builded ✔  \
 		|| (echo -e Couldn\'t build $(SALMON)$(NAME)$(CHERRY)✘ ; $(MAKE) increment_fails)
 	$(ENDLOG)
 
 $(OBJ): | $(OBJDIR) $(DEPDIR)
 
-$(OBJ):$(OBJDIR)/%.o: %.c
-	gcc -c $< -o $@ $(CFLAGS) \
+$(OBJ):$(OBJDIR)/%.o: %$(EXTENSION)
+	$(COMPILER) -c $< -o $@ $(FLAGS) \
 		&& echo -e $(CHERRY)$< $(SALMON)✔ $(CHERRY) \
 		|| (echo -e $(BOLD)$(SALMON)+1$(NORMAL)$(CHERRY) file fucked$(NORMAL); $(MAKE) increment_errors)
-	gcc -MM $< > $(DEPDIR)/$*.d $(CFLAGS)
+	$(COMPILER) -MM $< > $(DEPDIR)/$*.d $(FLAGS)
 	sed -i -e 's|.*:|$@:|' $(DEPDIR)/$*.d
 
 $(OBJDIR) $(DEPDIR):
